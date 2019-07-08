@@ -6,12 +6,13 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/Netflix-Skunkworks/policyuniverse/badge.svg?branch=master&1)](https://coveralls.io/github/Netflix-Skunkworks/policyuniverse?branch=master)
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+
 This package provides classes to parse AWS IAM and Resource Policies.
 
 Additionally, this package can expand wildcards in AWS Policies using permissions obtained from the AWS Policy Generator.
 
-See the [list of all AWS permissions](policyuniverse/master_permissions.json).
-See the [list of all permission categories](policyuniverse/action_categories.json).
+See the [Service and Permissions data](policyuniverse/data.json).
 
 _This package can also minify an AWS policy to help you stay under policy size limits. Avoid doing this if possible, as it creates ugly policies._ 💩
 
@@ -154,8 +155,8 @@ statement = Statement(statement12)
 assert statement.effect == 'Allow'
 assert statement.actions == set(['rds:*'])
 
-# rds:* expands out to ~79 individual permissions
-assert len(statement.actions_expanded) == 79
+# rds:* expands out to ~88 individual permissions
+assert len(statement.actions_expanded) == 88
 
 assert statement.uses_not_principal() == False
 assert statement.principals == set(['*'])
@@ -194,16 +195,16 @@ from policyuniverse.policy import Policy
 p = Policy(policy)
 for k, v in p.action_summary().items():
     print(k,v)
->>> ('s3', set([u'DataPlaneMutating', u'Permissions']))
->>> ('sqs', set([u'DataPlaneListRead']))
->>> ('sns', set([u'DataPlaneListRead', u'DataPlaneMutating', u'Permissions']))
+>>> ('s3', set([u'Write', u'Permissions', u'Tagging']))
+>>> ('sqs', set([u'List']))
+>>> ('sns', set([u'List', u'Read', u'Write', u'Permissions']))
 ```
-Possible categories are `Permissions`, `DataPlaneMutating`, and `DataPlaneListRead`.  This data can be used to summarize statements and policies and to look for sensitive permissions.
+Possible categories are `Permissions`, `Write`, `Read`, `Tagging`, and `List`.  This data can be used to summarize statements and policies and to look for sensitive permissions.
 
 ## Expanding and Minification
 ```python
-from policyuniverse import expand_policy
-from policyuniverse import minimize_policy
+from policyuniverse.expander_minimizer import expand_policy
+from policyuniverse.expander_minimizer import minimize_policy
 
 policy = {
         "Statement": [{
